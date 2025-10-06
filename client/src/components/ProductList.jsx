@@ -1,6 +1,6 @@
 // client/src/components/ProductList.jsx
 import React, { useState, useEffect } from 'react';
-
+const RENDER_API_URL = 'https://tienda-online-api-1vv9.onrender.com'
 // Componente simple para mostrar un solo producto
 const ProductCard = ({ product }) => (
   <div style={{ border: '1px solid #ccc', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
@@ -24,7 +24,7 @@ const ProductList = () => {
     const fetchProducts = async () => {
       try {
         // Aquí usamos la ruta relativa, Vite la redirige a http://localhost:5000/api/productos
-        const response = await fetch('/api/productos'); 
+        const response = await fetch(`${RENDER_API_URL}/api/productos`); 
         
         if (!response.ok) {
           throw new Error('No se pudo cargar la API de productos.');
