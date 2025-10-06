@@ -4,7 +4,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 // Importamos la ruta que acabamos de crear
 import productRoutes from './routes/productRoutes.js'; 
-
+import userRoutes from './routes/userRoutes.js'
 // 1. Cargar variables de entorno
 dotenv.config();
 
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 
 // Usamos las rutas de producto. Toda solicitud a /api/productos irá aquí.
 app.use('/api/productos', productRoutes); 
-
+app.use('/api/usuarios', userRoutes)
 // 5. Configuración de puertos
 const PORT = process.env.PORT || 5000;
 
