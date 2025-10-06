@@ -1,25 +1,29 @@
-// server/server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+// Importamos la ruta que acabamos de crear
+import productRoutes from './routes/productRoutes.js'; 
 
 // 1. Cargar variables de entorno
 dotenv.config();
 
-// 2. Conexión a la base de datos (lo definiremos en el siguiente paso)
+// 2. Conexión a la base de datos
 connectDB();
 
 const app = express();
 
 // 3. Middlewares
-app.use(express.json()); // Permite al servidor leer datos JSON
-app.use(cors()); // Permite la comunicación con el frontend de Vite
+app.use(express.json()); 
+app.use(cors()); 
 
-// 4. Ruta de prueba
+// 4. Ruta de prueba y Rutas de la API
 app.get('/', (req, res) => {
   res.send('API está corriendo...');
 });
+
+// Usamos las rutas de producto. Toda solicitud a /api/productos irá aquí.
+app.use('/api/productos', productRoutes); 
 
 // 5. Configuración de puertos
 const PORT = process.env.PORT || 5000;
