@@ -1,8 +1,9 @@
 // server/controllers/userController.js
 import asyncHandler from 'express-async-handler';
-import generateToken from '../utils/generateToken.js';
-import User from '../models/User.js';
-
+// CORRECCIÓN 1: Asegura la extensión .js para el módulo local
+import generateToken from '../utils/generateToken.js'; 
+// CORRECCIÓN 2: Asegura la extensión .js para el modelo de Mongoose
+import User from '../models/User.js'; 
 // @desc    Autenticar usuario y obtener token (Login)
 // @route   POST /api/usuarios/login
 // @access  Public
