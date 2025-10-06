@@ -1,10 +1,13 @@
-// server/routes/productRoutes.js
+// server/routes/productRoutes.js (AGREGAMOS el POST)
 import express from 'express';
-import { getProducts } from '../controllers/productController.js';
+// Importamos la nueva función
+import { getProducts, createProduct } from '../controllers/productController.js'; 
 
 const router = express.Router();
 
-// Define la ruta base: GET a /api/productos llama a la función getProducts
-router.route('/').get(getProducts);
+// Define: GET (obtener) y POST (crear) a /api/productos
+router.route('/')
+  .get(getProducts)
+  .post(createProduct); // Esta es la nueva línea
 
 export default router;
