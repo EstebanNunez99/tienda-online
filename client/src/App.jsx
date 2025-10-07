@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import ProductList from './components/ProductList';
 import ProductForm from './components/ProductForm'; 
-import ProductDetailScreen from './screens/productDetailScreen.jsx'; 
+import ProductDetailScreen from './screens/ProductDetailScreen.jsx'; 
 
 // Componente simple para la página de inicio
 const HomeScreen = () => (
