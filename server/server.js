@@ -14,20 +14,31 @@ const app = express();
 // ** IMPORTANTE: VERIFICA Y USA TU DOMINIO REAL DE VERCEL **
 const allowedOrigins = [
     'http://localhost:5173', 
-    'https://tienda-online-coral-three.vercel.app', 
-    'https://tienda-online-git-main-EstebanNunez99-projects.vercel.app' 
+    // Usamos una expresión regular para permitir TODOS los subdominios 
+    // bajo el nombre de tu proyecto en Vercel.
+    /^https:\/\/tienda-online.*\.vercel\.app$/,
 ];
 
 const corsOptions = {
+    // Aquí usamos la lógica mejorada para manejar Regex y Strings
     origin: (origin, callback) => {
-        // Permitir solicitudes sin origen (como las de Postman o CURL)
         if (!origin) return callback(null, true); 
-        
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'La política CORS para este sitio no permite el acceso desde el origen especificado.';
-            return callback(new Error(msg), false);
+
+        // Chequear si el origen es una cadena (localhost)
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
-        return callback(null, true);
+
+        // Chequear si el origen coincide con la expresión regular (Vercel)
+        for (const allowed of allowedOrigins) {
+            if (allowed instanceof RegExp && allowed.test(origin)) {
+                return callback(null, true);
+            }
+        }
+        
+        // Si no coincide con ninguna regla, denegar el acceso.
+        const msg = 'La política CORS para este sitio no permite el acceso desde el origen especificado.';
+        return callback(new Error(msg), false);
     },
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
