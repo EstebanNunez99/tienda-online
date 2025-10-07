@@ -1,12 +1,12 @@
-// server/utils/generateToken.js
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const generateToken = (id) => {
-  // Crea el token con el ID del usuario como payload
-  // y lo firma con tu secreto de Render (JWT_SECRET)
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d', // El token expira después de 30 días
-  });
+    // Nota: El SECRET es crítico. Debes añadirlo a Render (ver Paso 4)
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '30d',
+    });
 };
 
 export default generateToken;

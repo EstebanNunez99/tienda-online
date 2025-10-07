@@ -5,7 +5,7 @@ import cors from 'cors'; // <-- Ahora usa 'import'
 
 // Importamos las rutas (Nota: Necesitas añadir la extensión .js)
 import productRoutes from './routes/productRoutes.js'; 
-
+import userRoutes from './routes/userRoutes.js'
 dotenv.config();
 
 const app = express();
@@ -47,7 +47,7 @@ const corsOptions = {
 
 // Aplicar el middleware de CORS
 app.use(cors(corsOptions));
-// ******************************
+
 
 // Middleware
 app.use(express.json());
@@ -59,8 +59,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Rutas
 app.use('/api/productos', productRoutes);
+app.use('/api/usuarios', userRoutes)
 
-// Ruta de prueba
+// peticiones GET
 app.get('/', (req, res) => {
     res.send('API de Tienda Online funcionando.');
 });
