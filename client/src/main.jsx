@@ -1,4 +1,3 @@
-// client/src/main.jsx (REVISIÓN CRÍTICA)
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
@@ -7,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* ¡ESTE COMPONENTE DEBE ESTAR AQUÍ! */}
+    {/* ESTE ES EL COMPONENTE CLAVE QUE EVITA EL ERROR 'basename' */}
     <BrowserRouter>
       <App />
     </BrowserRouter>
