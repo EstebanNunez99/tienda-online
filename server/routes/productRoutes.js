@@ -1,15 +1,30 @@
 import express from 'express';
-
-// Importamos la nueva función
-import { getProducts, getProductById, createProduct } from '../controllers/productController.js'; 
-import { protect, admin } from '../middleware/authMiddleware.js'
+import { 
+    getProducts, 
+    getProductById, 
+    createProduct,
+    updateProduct, // <-- Nueva importación
+    deleteProduct  // <-- Nueva importación
+} from '../controllers/productController.js'; 
+// import { protect, admin } from '../middleware/authMiddleware.js' // Comentado temporalmente
 
 const router = express.Router();
 
-// Define: GET (obtener) y POST (crear) a /api/productos
+// Rutas a /api/productos
 router.route('/')
-  .get(getProducts)
-  .post(protect, admin, createProduct); 
+    .get(getProducts)
+    // Por ahora, lo dejamos sin middleware para facilitar la prueba
+    // router.route('/').post(protect, admin, createProduct); 
+    .post(createProduct); 
 
-router.route('/:id').get(getProductById);
+// Rutas a /api/productos/:id
+router.route('/:id')
+    .get(getProductById)
+    // Actualización (UPDATE)
+    // Lo dejamos sin middleware por ahora
+    .put(updateProduct) // <-- Ruta para EDITAR
+    // Eliminación (DELETE)
+    // Lo dejamos sin middleware por ahora
+    .delete(deleteProduct); // <-- Ruta para ELIMINAR
+
 export default router;

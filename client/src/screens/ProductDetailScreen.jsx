@@ -1,101 +1,112 @@
-// client/src/screens/ProductDetailScreen.jsx
 import React, { useState, useEffect } from 'react';
-// Hook de react-router-dom para obtener el ID de la URL
-import { useParams, Link } from 'react-router-dom'; 
-
-// **IMPORTANTE:** Usa la URL base de tu servicio Render
-const RENDER_API_URL = 'https://tienda-online-api-1vv9.onrender.com'; 
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ProductDetailScreen = () => {
-  // 1. Obtener el ID del producto de la URL
-  const { id } = useParams();
-  
-  // 2. Estados para manejar la data, carga y errores
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${RENDER_API_URL}/api/productos/${id}`);
-        
-        // Manejo de error si el servidor devuelve un 404
-        if (!response.ok) {
-          throw new Error('Producto no encontrado en el servidor.');
+    // Definimos la URL base de la API
+    const API_URL_BASE = import.meta.env.VITE_API_URL;
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                // **CORRECCIÓN GET:** Usamos la variable de entorno
+                const response = await fetch(`${API_URL_BASE}/productos/${id}`);
+                
+                if (!response.ok) {
+                    // Si el producto no se encuentra (404), lanzamos un error
+                    if (response.status === 404) {
+                        throw new Error('Producto no encontrado (404)');
+                    }
+                    throw new Error('Error al cargar el producto.');
+                }
+                const data = await response.json();
+                setProduct(data);
+            } catch (err) {
+                setError(err.message);
+                console.error("Error fetching product:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProduct();
         }
+    }, [id, API_URL_BASE]); // Incluimos API_URL_BASE como dependencia para ESLint
 
-        const data = await response.json();
-        setProduct(data);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (loading) return <div style={{ padding: '20px' }}>Cargando detalles del producto...</div>;
+    if (error) return <div style={{ padding: '20px', color: 'red' }}>Error: {error}</div>;
+    if (!product) return <div style={{ padding: '20px' }}>No se pudo cargar la información del producto.</div>;
 
-    if (id) {
-      fetchProduct();
-    }
-  }, [id]); // El efecto se ejecuta cuando el ID de la URL cambia
+    return (
+        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', display: 'flex', gap: '40px', alignItems: 'flex-start' }}>
+            
+            {/* Imagen del Producto */}
+            <div style={{ flex: '1', minWidth: '300px' }}>
+                <img 
+                    src={product.imagen_url || 'https://placehold.co/400x300/e9ecef/212529?text=Sin+Imagen'} 
+                    alt={product.nombre} 
+                    style={{ width: '100%', height: 'auto', borderRadius: '10px', objectFit: 'cover' }}
+                />
+            </div>
 
-  // 3. Renderizado condicional
-  if (loading) {
-    return <div style={{ textAlign: 'center', fontSize: '1.5em' }}>Cargando producto...</div>;
-  }
+            {/* Detalles */}
+            <div style={{ flex: '2' }}>
+                <h1 style={{ marginBottom: '10px', fontSize: '2em' }}>{product.nombre}</h1>
+                <p style={{ color: '#007bff', fontSize: '1.8em', fontWeight: 'bold', borderBottom: '2px solid #ccc', paddingBottom: '10px' }}>
+                    ${product.precio.toFixed(2)}
+                </p>
+                <p style={{ marginTop: '20px', lineHeight: '1.6' }}>
+                    {product.descripcion}
+                </p>
+                <p style={{ marginTop: '15px', fontWeight: 'bold', color: product.stock > 0 ? '#28a745' : '#dc3545' }}>
+                    Stock: {product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}
+                </p>
 
-  if (error) {
-    return <div style={{ color: 'red', fontSize: '1.2em' }}>Error: {error}</div>;
-  }
+                {/* Botón de Comprar (Simulado) */}
+                <button 
+                    onClick={() => console.log(`Añadiendo ${product.nombre} al carrito`)}
+                    disabled={product.stock === 0}
+                    style={{ 
+                        marginTop: '30px', 
+                        padding: '12px 25px', 
+                        fontSize: '1em', 
+                        backgroundColor: product.stock > 0 ? '#007bff' : '#6c757d', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '5px', 
+                        cursor: product.stock > 0 ? 'pointer' : 'not-allowed'
+                    }}
+                >
+                    {product.stock > 0 ? 'Añadir al Carrito' : 'Sin Stock'}
+                </button>
 
-  // Si no hay producto (ej: ID inválido que no causó 404)
-  if (!product) {
-    return <div>No se pudo cargar el producto.</div>;
-  }
-
-  // 4. Renderizado del detalle del producto
-  return (
-    <div style={{ maxWidth: '900px', margin: '30px auto', padding: '20px', border: '1px solid #ddd' }}>
-      
-      {/* Botón de regreso */}
-      <Link to="/" style={{ textDecoration: 'none', color: '#007bff', marginBottom: '20px', display: 'inline-block' }}>
-        ← Volver al Catálogo
-      </Link>
-
-      <div style={{ display: 'flex', gap: '40px' }}>
-        {/* Columna de Imagen */}
-        <div style={{ flex: 1 }}>
-          <img 
-            src={product.imagen_url} 
-            alt={product.nombre} 
-            style={{ width: '100%', borderRadius: '8px' }} 
-          />
+                <button 
+                    onClick={() => navigate('/')}
+                    style={{
+                        marginTop: '20px',
+                        padding: '10px 20px',
+                        fontSize: '0.9em',
+                        backgroundColor: 'transparent',
+                        color: '#6c757d',
+                        border: '1px solid #ccc',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        marginLeft: '10px'
+                    }}
+                >
+                    Volver al Catálogo
+                </button>
+            </div>
         </div>
-        
-        {/* Columna de Detalles */}
-        <div style={{ flex: 1 }}>
-          <h2 style={{ borderBottom: '2px solid #eee', paddingBottom: '10px' }}>{product.nombre}</h2>
-          <p style={{ fontSize: '1.4em', fontWeight: 'bold', color: '#28a745' }}>${product.precio}</p>
-          
-          <p>Descripción: {product.descripcion}</p>
-          
-          <p style={{ fontWeight: 'bold', color: product.stock > 0 ? 'green' : 'red' }}>
-            Estado: {product.stock > 0 ? `En Stock (${product.stock})` : 'Agotado'}
-          </p>
-
-          {/* Aquí irá el botón de Agregar al Carrito en el futuro */}
-          <button 
-            disabled={product.stock === 0}
-            style={{ padding: '10px 20px', backgroundColor: product.stock > 0 ? '#007bff' : '#6c757d', color: 'white', border: 'none', cursor: product.stock > 0 ? 'pointer' : 'not-allowed', marginTop: '15px' }}
-          >
-            {product.stock > 0 ? 'Agregar al Carrito' : 'Sin Stock'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ProductDetailScreen;

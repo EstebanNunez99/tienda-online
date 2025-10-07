@@ -1,102 +1,176 @@
-// client/src/components/ProductForm.jsx (COMPLETO)
-import React, { useState } from 'react';
+// client/src/components/ProductForm.jsx (ACTUALIZADO para usar VITE_API_URL)
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-// Asegúrate de usar tu URL real de Render aquí, con HTTPS
-const RENDER_API_URL = 'https://tienda-online-api-1vv9.onrender.com'; 
-
-const ProductForm = () => {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    descripcion: '',
-    imagen_url: '',
-    precio: 0,
-    stock: 0,
-  });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value, type } = e.target;
+// Aceptamos la prop isEdit (true/false) para determinar el modo
+const ProductForm = ({ isEdit = false }) => {
+    // Usamos useNavigate para la redirección después de guardar
+    const navigate = useNavigate(); 
+    // Usamos useParams para obtener el ID si estamos en modo edición
+    const { id } = useParams(); 
     
-    // Convertimos precio y stock a números, ya que la API lo espera como `numeric` e `integer`
-    const val = type === 'number' ? parseFloat(value) : value;
+    // Definimos la URL base de la API usando la variable de entorno
+    const API_URL_BASE = import.meta.env.VITE_API_URL;
 
-    setFormData({
-      ...formData,
-      [name]: val,
+    const [formData, setFormData] = useState({
+        nombre: '',
+        descripcion: '',
+        imagen_url: '',
+        precio: '',
+        stock: '',
     });
-  };
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('Enviando...');
-    setError(false);
+    // 1. Efecto para cargar datos en modo Edición
+    useEffect(() => {
+        if (isEdit && id) {
+            const fetchProduct = async () => {
+                setLoading(true);
+                try {
+                    // **CORRECCIÓN GET (Edición):** Usamos la variable de entorno
+                    const response = await fetch(`${API_URL_BASE}/productos/${id}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Producto no encontrado');
+                    }
+                    const data = await response.json();
+                    // Llenar el formulario con los datos existentes
+                    setFormData({
+                        nombre: data.nombre,
+                        descripcion: data.descripcion,
+                        imagen_url: data.imagen_url,
+                        // Aseguramos que precio y stock sean strings para los inputs
+                        precio: data.precio.toString(), 
+                        stock: data.stock.toString(), 
+                    });
+                } catch (error) {
+                    console.error('Error al cargar el producto para edición: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchProduct();
+        } else {
+             // Si no es edición, limpiar el formulario (en la ruta /admin/crear)
+             setFormData({
+                 nombre: '',
+                 descripcion: '',
+                 imagen_url: '',
+                 precio: '',
+                 stock: '',
+             });
+        }
+    }, [isEdit, id]);
 
-    try {
-      const response = await fetch(`${RENDER_API_URL}/api/productos`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Asegúrate de enviar un objeto con los 5 campos que espera tu API
-        body: JSON.stringify(formData), 
-      });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
+    // Función genérica para manejar cambios en los inputs
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
 
-      const data = await response.json();
-      setMessage(`Producto "${data.nombre}" creado con éxito! ID: ${data._id}`);
-      setError(false);
-      
-      // Limpiamos el formulario después de la creación
-      setFormData({ nombre: '', descripcion: '', imagen_url: '', precio: 0, stock: 0 });
+    // 2. Función para manejar el envío (CREATE o UPDATE)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
-    } catch (err) {
-      setError(true);
-      setMessage(`Fallo al crear producto: ${err.message}.`);
-    }
-  };
-
-  return (
-    <div style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '5px', marginBottom: '30px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>Añadir Nuevo Producto</h2>
-      <form onSubmit={handleSubmit}>
+        // Determinamos el método y la URL
+        const method = isEdit ? 'PUT' : 'POST';
         
-        {/* Input: Nombre */}
-        <label style={{ display: 'block', margin: '10px 0 5px' }}>Nombre:</label>
-        <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        // **CORRECCIÓN POST/PUT:** Usamos la variable de entorno
+        const url = isEdit ? `${API_URL_BASE}/productos/${id}` : `${API_URL_BASE}/productos`;
 
-        {/* Input: Descripción */}
-        <label style={{ display: 'block', margin: '10px 0 5px' }}>Descripción:</label>
-        <textarea name="descripcion" value={formData.descripcion} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
+        // Convertimos precio y stock a números antes de enviar
+        const dataToSend = {
+            ...formData,
+            precio: parseFloat(formData.precio),
+            stock: parseInt(formData.stock),
+        };
 
-        {/* Input: Precio y Stock (en la misma fila) */}
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <div>
-            <label style={{ display: 'block', margin: '10px 0 5px' }}>Precio ($):</label>
-            <input type="number" name="precio" value={formData.precio} onChange={handleChange} required min="0" step="0.01" style={{ padding: '8px', marginBottom: '10px' }} />
-          </div>
-          <div>
-            <label style={{ display: 'block', margin: '10px 0 5px' }}>Stock:</label>
-            <input type="number" name="stock" value={formData.stock} onChange={handleChange} required min="0" style={{ padding: '8px', marginBottom: '10px' }} />
-          </div>
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSend),
+            });
+
+            if (!response.ok) {
+                // Si el servidor devuelve un error, lo parseamos
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Fallo al ${isEdit ? 'actualizar' : 'crear'} el producto`);
+            }
+
+            // Éxito:
+            console.log(`Producto ${isEdit ? 'actualizado' : 'creado'} con éxito!`);
+            
+            // Redirigir al panel de administración 
+            navigate('/admin');
+
+        } catch (error) {
+            console.error(`Error en el formulario: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading && isEdit) return <h2>Cargando datos del producto...</h2>;
+
+    return (
+        <div style={{ padding: '20px', border: '1px solid #ccc' }}>
+            <h2>{isEdit ? 'Editar Producto' : 'Crear Nuevo Producto'}</h2>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <input
+                    type="text"
+                    name="nombre"
+                    placeholder="Nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                />
+                <textarea
+                    name="descripcion"
+                    placeholder="Descripción"
+                    value={formData.descripcion}
+                    onChange={handleChange}
+                    required
+                />
+                <input
+                    type="url"
+                    name="imagen_url"
+                    placeholder="URL de la Imagen"
+                    value={formData.imagen_url}
+                    onChange={handleChange}
+                    required
+                />
+                <input
+                    type="number"
+                    name="precio"
+                    placeholder="Precio"
+                    value={formData.precio}
+                    onChange={handleChange}
+                    step="0.01"
+                    required
+                />
+                <input
+                    type="number"
+                    name="stock"
+                    placeholder="Stock"
+                    value={formData.stock}
+                    onChange={handleChange}
+                    required
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Guardando...' : (isEdit ? 'Guardar Cambios' : 'Crear Producto')}
+                </button>
+                {/* En modo edición, mostramos un botón para volver */}
+                {isEdit && <button type="button" onClick={() => navigate('/admin')} style={{ marginTop: '5px', backgroundColor: '#6c757d' }}>Cancelar</button>}
+            </form>
         </div>
-
-        {/* Input: URL de Imagen */}
-        <label style={{ display: 'block', margin: '10px 0 5px' }}>URL de Imagen:</label>
-        <input type="text" name="imagen_url" value={formData.imagen_url} onChange={handleChange} required style={{ width: '100%', padding: '8px', marginBottom: '10px' }} />
-        
-        <button type="submit" style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>
-          Crear Producto
-        </button>
-      </form>
-
-      {/* Muestra el mensaje de estado */}
-      {message && <p style={{ color: error ? 'red' : 'green', marginTop: '15px', fontWeight: 'bold' }}>{message}</p>}
-    </div>
-  );
+    );
 };
 
 export default ProductForm;

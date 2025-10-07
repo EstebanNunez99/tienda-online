@@ -1,14 +1,18 @@
+// client/src/main.jsx (ACTUALIZADO CON CartProvider)
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
-// Importamos BrowserRouter aquí
 import { BrowserRouter } from 'react-router-dom'; 
+// Importar el proveedor del carrito
+import { CartProvider } from './context/CartContext.jsx'; 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* ESTE ES EL COMPONENTE CLAVE QUE EVITA EL ERROR 'basename' */}
     <BrowserRouter>
-      <App />
+      {/* ¡Envolvemos la App con el CartProvider! */}
+      <CartProvider> 
+        <App />
+      </CartProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );
