@@ -10,6 +10,22 @@ const getProducts = asyncHandler(async (req, res) => {
   res.json(products);
 });
 
+// @desc    Obtener producto por ID (¡NUEVA FUNCIÓN!)
+// @route   GET /api/productos/:id
+// @access  Public
+const getProductById = asyncHandler(async (req, res) => {
+  // Buscamos el producto usando el ID que viene en la URL
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    res.json(product); // Devolvemos el producto
+  } else {
+    // Si no lo encuentra, devolvemos un error 404
+    res.status(404); 
+    throw new Error('Producto no encontrado');
+  }
+});
+
 // @desc    Crear un nuevo producto (¡NUEVA FUNCIÓN!)
 // @route   POST /api/productos
 // @access  Public (Por ahora, lo haremos público para probar)
@@ -35,4 +51,4 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 // Exportamos ambas funciones
-export { getProducts, createProduct };
+export { getProducts, getProductById, createProduct };
