@@ -1,22 +1,21 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors'); // <-- IMPORTAMOS CORS
-const productRoutes = require('./routes/productRoutes');
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors'; // <-- Ahora usa 'import'
+
+// Importamos las rutas (Nota: Necesitas añadir la extensión .js)
+import productRoutes from './routes/productRoutes.js'; 
 
 dotenv.config();
 
 const app = express();
 
 // ** 1. CONFIGURACIÓN DE CORS **
-// Aquí debes listar explícitamente los dominios que pueden acceder a tu API.
-// 
-// - http://localhost:5173: Para desarrollo local.
-// - https://tienda-online-xxxx.vercel.app: El dominio de Vercel de tu Frontend.
+// ** IMPORTANTE: VERIFICA Y USA TU DOMINIO REAL DE VERCEL **
 const allowedOrigins = [
     'http://localhost:5173', 
-    'https://tienda-online-coral-three.vercel.app', // <-- REEMPLAZA CON TU DOMINIO REAL DE VERCEL
-    'https://tienda-online-git-main-estebannunez99-projects.vercel.app' // <-- Dominio de la rama main
+    'https://tienda-online-coral-three.vercel.app', 
+    'https://tienda-online-git-main-EstebanNunez99-projects.vercel.app' 
 ];
 
 const corsOptions = {
@@ -38,7 +37,6 @@ const corsOptions = {
 // Aplicar el middleware de CORS
 app.use(cors(corsOptions));
 // ******************************
-
 
 // Middleware
 app.use(express.json());
