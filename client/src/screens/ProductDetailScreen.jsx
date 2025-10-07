@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom'; 
 
 // **IMPORTANTE:** Usa la URL base de tu servicio Render
-const RENDER_API_URL = 'https://[TU-SERVICIO-RENDER].onrender.com'; 
+const RENDER_API_URL = 'https://tienda-online-api-1vv9.onrender.com'; 
 
 const ProductDetailScreen = () => {
   // 1. Obtener el ID del producto de la URL
